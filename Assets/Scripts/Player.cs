@@ -1,10 +1,6 @@
 using ObjectPool;
-using System.Collections;
-using System.Collections.Generic;
-using System.Drawing;
-using Unity.VisualScripting;
 using UnityEngine;
-using static System.Net.WebRequestMethods;
+
 
 namespace Arkanoid
 {
@@ -14,14 +10,22 @@ namespace Arkanoid
         [SerializeField] private float _acceleration;
         [SerializeField] private float _maxHp = 100;
         [SerializeField] private float _hp = 100;
+
         [SerializeField] private Rigidbody2D _bullet;
         [SerializeField] private Transform _barrel;
         [SerializeField] private float _force;
+
+        [SerializeField] private Sprite _bulletSprite;
+        [SerializeField] private float _bulletMass;
+        [SerializeField] private int bulletLayer = 3;
+        [SerializeField] private float bulletLifeTime = 2f;
+
         private Camera _camera;
         private Ship _ship;
         private Gun _gun;
         private Health _health;
         private IViewServices _viewServices;
+
         private void Start()
         {
             _camera = Camera.main;
@@ -33,9 +37,6 @@ namespace Arkanoid
             _health = new Health(_maxHp, _hp);
         }
         
-        // хорошо бы вообще всё это переписать, класс плеер сделать отдельно, а тут создать какой-нить гейм контроллер, чтобы он всё обрабатывал
-        // ну или смириться с тем, что будет больше одного апдейта и отдельно обрабатывать вражеские корабли, метеориты и пули (скорее всего так и сделаю)
-
         private void Update()
         {
             var direction = Input.mousePosition - _camera.WorldToScreenPoint(transform.position);
@@ -57,19 +58,23 @@ namespace Arkanoid
                 StartCoroutine(_gun.Shoot());
             }
 
-            // just for tests
-            if (Input.GetButtonDown("Jump"))
+            if (Input.GetButtonDown("Fire2"))
             {
-                _health.TakeDamage(10);
-                Debug.Log($"HIT! Health left: {_health.HealthPoints}");
-                if (_health.HealthPoints <= 0)
-                {
-                    Destroy(gameObject);
-                }
+                // да, для всего этого можно было создать новый метод в классе Gun
+                // я сначала так и сделал, но не придумал, как вызывать Destroy
+                // так что пусть будет тут
+                var altBullet = new GameObject().
+                    SetName("AltBullet").
+                    SetLayer(bulletLayer).
+                    SetTransform(_barrel).
+                    AddBoxCollider2D().
+                    AddRigidbody2D(_bulletMass).
+                    AddSprite(_bulletSprite).
+                    AddForce(_force, _barrel);
+                Destroy(altBullet, bulletLifeTime);
             }
-            //_barrel.position = new Vector2(Random.Range(-2, 2), Random.Range(-2, 2));
-            
         }
+
         private void OnCollisionEnter2D(Collision2D other)
         {
             if (other.gameObject.TryGetComponent<Asteroid>(out var asteroid))
