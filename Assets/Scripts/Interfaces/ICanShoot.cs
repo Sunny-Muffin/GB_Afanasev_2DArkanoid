@@ -1,10 +1,12 @@
+using System.Collections;
 using UnityEngine;
 
 namespace Arkanoid
 {
-    public interface ICanShoot
+    public interface IShootable
     {
         float Force { get; }
-        void Shoot(Rigidbody2D bullet);
+        //void Shoot();
+        IEnumerator Shoot();
     }
 }

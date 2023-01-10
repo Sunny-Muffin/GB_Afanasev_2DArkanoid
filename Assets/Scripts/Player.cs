@@ -1,6 +1,10 @@
+using ObjectPool;
 using System.Collections;
 using System.Collections.Generic;
+using System.Drawing;
+using Unity.VisualScripting;
 using UnityEngine;
+using static System.Net.WebRequestMethods;
 
 namespace Arkanoid
 {
@@ -8,6 +12,7 @@ namespace Arkanoid
     {
         [SerializeField] private float _speed;
         [SerializeField] private float _acceleration;
+        [SerializeField] private float _maxHp = 100;
         [SerializeField] private float _hp = 100;
         [SerializeField] private Rigidbody2D _bullet;
         [SerializeField] private Transform _barrel;
@@ -16,14 +21,16 @@ namespace Arkanoid
         private Ship _ship;
         private Gun _gun;
         private Health _health;
+        private IViewServices _viewServices;
         private void Start()
         {
             _camera = Camera.main;
             var moveTransform = new AccelerationMove(transform, _speed, _acceleration);
             var rotation = new RotateTransform(transform);
             _ship = new Ship(moveTransform, rotation);
-            _gun = new Gun(_force, _barrel);
-            _health = new Health(_hp);
+            _viewServices = new ViewServices();
+            _gun = new Gun(_bullet, _viewServices, _force, _barrel);
+            _health = new Health(_maxHp, _hp);
         }
         
         // хорошо бы вообще всё это переписать, класс плеер сделать отдельно, а тут создать какой-нить гейм контроллер, чтобы он всё обрабатывал
@@ -47,9 +54,7 @@ namespace Arkanoid
 
             if (Input.GetButtonDown("Fire1"))
             {
-                var temAmmunition = Instantiate(_bullet, _barrel.position, _barrel.rotation);
-                _gun.Shoot(temAmmunition);
-                Destroy(temAmmunition.gameObject, 1f);
+                StartCoroutine(_gun.Shoot());
             }
 
             // just for tests
@@ -62,16 +67,18 @@ namespace Arkanoid
                     Destroy(gameObject);
                 }
             }
+            //_barrel.position = new Vector2(Random.Range(-2, 2), Random.Range(-2, 2));
+            
         }
         private void OnCollisionEnter2D(Collision2D other)
         {
-            // стоит создать класс объекта (метеорита, пули), у которых будет параметр урона и при столкновении передавать этот урон сюда
-            // сейчас магическая цифра, да, знаю, плохо
-            _health.TakeDamage(10);
-
-            if (_health.HealthPoints <= 0)
+            if (other.gameObject.TryGetComponent<Asteroid>(out var asteroid))
             {
-                Destroy(gameObject);
+                _health.TakeDamage(asteroid._damage);
+                if (_health.HealthPoints <= 0)
+                {
+                    Destroy(gameObject);
+                }
             }
         }
     }

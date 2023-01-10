@@ -2,12 +2,14 @@ using UnityEngine;
 
 namespace Arkanoid
 {
-    internal class Health : IDamagable
+    public sealed class Health : IDamagable
     {
-        public float HealthPoints { get; protected set; }
+        public float MaxHealth { get; }
+        public float HealthPoints { get; private set; }
 
-        public Health(float healthPoints)
+        public Health(float max, float healthPoints)
         {
+            MaxHealth = max;
             HealthPoints = healthPoints;
         }
 
@@ -21,11 +23,9 @@ namespace Arkanoid
             HealthPoints += aid;
         }
 
-        /*
-        public float UpdateHealth()
+        public void UpdateHealth(float hp)
         {
-            return HealthPoints;
+            HealthPoints = hp;
         }
-        */
     }
 }
