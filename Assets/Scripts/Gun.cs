@@ -21,7 +21,7 @@ namespace Arkanoid
             Force = force;
             _barrel = barrel;
         }
-        /*
+        
         public IEnumerator Shoot ()
         {
             var bullet = _viewServices.Instantiate<Rigidbody2D>(_bulletPrefab.gameObject, _barrel);
@@ -29,9 +29,10 @@ namespace Arkanoid
             yield return new WaitForSeconds(_bulletLifeTime);
             _viewServices.Destroy(bullet.gameObject);
         }
-        */
+        
 
         // вызов пула через сервис локатор (для домашки)
+        /*
         public IEnumerator Shoot()
         {
             ServiceLocator.SetService<IViewServices>(new ViewServices());
@@ -40,6 +41,7 @@ namespace Arkanoid
             yield return new WaitForSeconds(_bulletLifeTime);
             ServiceLocator.Resolve<IViewServices>().Destroy(bullet.gameObject);
         }
+        */
     }
 }
 
