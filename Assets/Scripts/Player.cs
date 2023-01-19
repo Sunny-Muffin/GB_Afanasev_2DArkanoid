@@ -17,12 +17,13 @@ namespace Arkanoid
 
         [SerializeField] private Sprite _bulletSprite;
         [SerializeField] private float _bulletMass;
-        [SerializeField] private int bulletLayer = 3;
-        [SerializeField] private float bulletLifeTime = 2f;
+        [SerializeField] private int _bulletLayer = 3;
+        [SerializeField] private float _bulletLifeTime = 2f;
 
         private Camera _camera;
         private Ship _ship;
         private Gun _gun;
+        private Gun _altGun;
         private Health _health;
         private IViewServices _viewServices;
 
@@ -34,6 +35,7 @@ namespace Arkanoid
             _ship = new Ship(moveTransform, rotation);
             _viewServices = new ViewServices();
             _gun = new Gun(_bullet, _viewServices, _force, _barrel);
+            _altGun = new Gun(_bulletLayer, _barrel, _bulletMass, _bulletSprite, _force);
             _health = new Health(_maxHp, _hp);
         }
         
@@ -60,18 +62,8 @@ namespace Arkanoid
 
             if (Input.GetButtonDown("Fire2"))
             {
-                // да, для всего этого можно было создать новый метод в классе Gun
-                // я сначала так и сделал, но не придумал, как вызывать Destroy
-                // так что пусть будет тут
-                var altBullet = new GameObject().
-                    SetName("AltBullet").
-                    SetLayer(bulletLayer).
-                    SetTransform(_barrel).
-                    AddBoxCollider2D().
-                    AddRigidbody2D(_bulletMass).
-                    AddSprite(_bulletSprite).
-                    AddForce(_force, _barrel);
-                Destroy(altBullet, bulletLifeTime);
+                var altBullet = _altGun.AltShoot();
+                Destroy(altBullet, _bulletLifeTime);
             }
         }
 

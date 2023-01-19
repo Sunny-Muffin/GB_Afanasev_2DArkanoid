@@ -14,10 +14,14 @@ namespace Arkanoid
         [SerializeField] private float topPoint = 3;
         [SerializeField] private float bottomPoint = -3;
 
-        [SerializeField] private Rigidbody2D _bullet;
-        [SerializeField] private Transform _barrel;
+         [SerializeField] private Transform _barrel;
         [SerializeField] private float _force;
         [SerializeField] private float _gunCoolDown;
+
+        [SerializeField] private Sprite _bulletSprite;
+        [SerializeField] private float _bulletMass;
+        [SerializeField] private int _bulletLayer = 3;
+        [SerializeField] private float _bulletLifeTime = 2f;
 
         [SerializeField] private Vector2 _shootingPoint;
 
@@ -25,7 +29,6 @@ namespace Arkanoid
         private Ship _ship;
         private Gun _gun;
         private Health _health;
-        private IViewServices _viewServices;
         private Player _player;
 
         private bool _moveUp = true;
@@ -37,8 +40,7 @@ namespace Arkanoid
             var moveTransform = new AccelerationMove(transform, _speed, _acceleration);
             var rotation = new RotateTransform(transform);
             _ship = new Ship(moveTransform, rotation);
-            _viewServices = new ViewServices();
-            _gun = new Gun(_bullet, _viewServices, _force, _barrel);
+            _gun = new Gun(_bulletLayer, _barrel, _bulletMass, _bulletSprite, _force);
             _health = new Health(_maxHp, _hp);
             _player = FindObjectOfType<Player>();
         }
@@ -50,10 +52,12 @@ namespace Arkanoid
 
             // make enemy ship move ramndomly in screen bounds
             /*
-             * враг спавнится за пределами экрана, поссле того как предыдущий враг был уничтожен (через пул?)
+             * 
              * у врага отнимается здоровье при попадании пули
              * у игрока отнимается здоровье при попадании вражеской пули
              * 
+             done * враг спавнится за пределами экрана, поссле того как предыдущий враг был уничтожен
+             done * переделать стрельбу, потому что эта работает неправильно =(
              done * заелтает в координаты 5;0
              done * начинает двигаться вверх-вниз
              done * стреляет раз в какое то время
@@ -87,7 +91,7 @@ namespace Arkanoid
                     }
                 }
 
-                //  скорость хз как регулировать, надо подумать
+                // скорость хз как регулировать, надо подумать
                 
             }
 
@@ -102,8 +106,8 @@ namespace Arkanoid
         private IEnumerator Fire()
         {
             _isShooting = true;
-            Debug.Log("BANG!");
-            StartCoroutine(_gun.Shoot());
+            var bullet = _gun.AltShoot();
+            Destroy(bullet, _bulletLifeTime);
             yield return new WaitForSeconds(_gunCoolDown);
             _isShooting = false;
         }
