@@ -8,36 +8,52 @@ namespace Arkanoid
     {
         private Rigidbody2D _bulletPrefab; 
         private IViewServices _viewServices;
-        private Transform _barrel;
+        private Transform _barrelPosition;
         private float _bulletLifeTime = 2f;
 
         private int _bulletLayer;
         private float _bulletMass;
         private Sprite _bulletSprite;
 
-        public float Force { get; protected set; }
-        public float Force2 { get; protected set; }
+        private AudioClip _audioClip;
+        private readonly AudioSource _audioSource;
 
-        public Gun (Rigidbody2D bulletPrefab, IViewServices viewServices, float force, Transform barrel)
+
+        public float Force { get; protected set; }
+
+        public Gun (Rigidbody2D bulletPrefab, IViewServices viewServices, float force, Transform barrelPosition, AudioSource audioSource, AudioClip audioClip)
         {
             _bulletPrefab = bulletPrefab;
             _viewServices = viewServices;
             Force = force;
-            _barrel = barrel;
+            _barrelPosition = barrelPosition;
+            _audioSource = audioSource;
+            _audioClip = audioClip;
         }
-        public Gun(int bulletLayer, Transform barrel, float bulletMass,Sprite bulletSprite, float force)
+        public Gun(int bulletLayer, Transform barrelPosition, float bulletMass, Sprite bulletSprite, float force)
         {
             _bulletLayer = bulletLayer;
-            _barrel = barrel;
+            _barrelPosition = barrelPosition;
             _bulletMass = bulletMass;
             _bulletSprite = bulletSprite;
             Force = force;
         }
 
+        public void SetBarrelPosition(Transform barrelPosition)
+        {
+            _barrelPosition = barrelPosition;
+        }
+        public void SetAudioClip(AudioClip audioClip)
+        {
+            _audioClip = audioClip;
+        }
+
+
         public IEnumerator Shoot ()
         {
-            var bullet = _viewServices.Instantiate<Rigidbody2D>(_bulletPrefab.gameObject, _barrel);
-            bullet.AddForce(_barrel.up * Force);
+            var bullet = _viewServices.Instantiate<Rigidbody2D>(_bulletPrefab.gameObject, _barrelPosition);
+            bullet.AddForce(_barrelPosition.up * Force);
+            _audioSource.PlayOneShot(_audioClip);
             yield return new WaitForSeconds(_bulletLifeTime);
             _viewServices.Destroy(bullet.gameObject);
         }
@@ -47,11 +63,11 @@ namespace Arkanoid
             var altBullet = new GameObject().
                 SetName("AltBullet").
                 SetLayer(_bulletLayer).
-                SetTransform(_barrel).
+                SetTransform(_barrelPosition).
                 AddBoxCollider2D().
                 AddRigidbody2D(_bulletMass).
                 AddSprite(_bulletSprite).
-                AddForce(Force, _barrel);
+                AddForce(Force, _barrelPosition);
             return altBullet;
         }
         

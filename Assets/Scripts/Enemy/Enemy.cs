@@ -14,7 +14,7 @@ namespace Arkanoid
         [SerializeField] private float topPoint = 3;
         [SerializeField] private float bottomPoint = -3;
 
-         [SerializeField] private Transform _barrel;
+        [SerializeField] private Transform _barrel;
         [SerializeField] private float _force;
         [SerializeField] private float _gunCoolDown;
 
@@ -50,7 +50,6 @@ namespace Arkanoid
             var _playerPosition = _player.transform.position;
             _ship.Rotate(_playerPosition - transform.position);
 
-            // make enemy ship move ramndomly in screen bounds
             /*
              * 
              * у врага отнимается здоровье при попадании пули
@@ -90,9 +89,6 @@ namespace Arkanoid
                         _moveUp = true;
                     }
                 }
-
-                // скорость хз как регулировать, надо подумать
-                
             }
 
 

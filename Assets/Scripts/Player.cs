@@ -1,4 +1,5 @@
 using ObjectPool;
+using System;
 using UnityEngine;
 
 
@@ -11,10 +12,18 @@ namespace Arkanoid
         [SerializeField] private float _maxHp = 100;
         [SerializeField] private float _hp = 100;
 
+        [Header("Standart Gun")]
         [SerializeField] private Rigidbody2D _bullet;
-        [SerializeField] private Transform _barrel;
+        [SerializeField] private Transform _barrelPosition;
         [SerializeField] private float _force;
+        [SerializeField] private AudioSource _audioSource;
+        [SerializeField] private AudioClip _audioClip;
 
+        [Header("New barrel")]
+        [SerializeField] private AudioClip _newBarrelAudioClip;
+        [SerializeField] private GameObject _newBarrel;
+
+        [Header("Alternative Gun")]
         [SerializeField] private Sprite _bulletSprite;
         [SerializeField] private float _bulletMass;
         [SerializeField] private int _bulletLayer = 3;
@@ -26,6 +35,7 @@ namespace Arkanoid
         private Gun _altGun;
         private Health _health;
         private IViewServices _viewServices;
+        private ModificationWeapon _modificationWeapon;
 
         private void Start()
         {
@@ -34,9 +44,13 @@ namespace Arkanoid
             var rotation = new RotateTransform(transform);
             _ship = new Ship(moveTransform, rotation);
             _viewServices = new ViewServices();
-            _gun = new Gun(_bullet, _viewServices, _force, _barrel);
-            _altGun = new Gun(_bulletLayer, _barrel, _bulletMass, _bulletSprite, _force);
+            _gun = new Gun(_bullet, _viewServices, _force, _barrelPosition, _audioSource, _audioClip);
+            _altGun = new Gun(_bulletLayer, _barrelPosition, _bulletMass, _bulletSprite, _force);
             _health = new Health(_maxHp, _hp);
+
+            var newBarrel = new Barrel(_newBarrelAudioClip, _barrelPosition, _newBarrel);
+            _modificationWeapon = new ModificationBarrel(_barrelPosition.position, newBarrel, _audioSource);
+            _modificationWeapon.ApplyModification(_gun);
         }
         
         private void Update()
@@ -62,9 +76,13 @@ namespace Arkanoid
 
             if (Input.GetButtonDown("Fire2"))
             {
-                var altBullet = _altGun.AltShoot();
-                Destroy(altBullet, _bulletLifeTime);
+                //var altBullet = _altGun.AltShoot();
+                //Destroy(altBullet, _bulletLifeTime);
+
+                //_modificationWeapon.Shoot();
             }
+
+
         }
 
         private void OnCollisionEnter2D(Collision2D other)
