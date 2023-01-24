@@ -36,6 +36,7 @@ namespace Arkanoid
         private Health _health;
         private IViewServices _viewServices;
         private ModificationWeapon _modificationWeapon;
+        private bool isModified = false;
 
         private void Start()
         {
@@ -47,10 +48,6 @@ namespace Arkanoid
             _gun = new Gun(_bullet, _viewServices, _force, _barrelPosition, _audioSource, _audioClip);
             _altGun = new Gun(_bulletLayer, _barrelPosition, _bulletMass, _bulletSprite, _force);
             _health = new Health(_maxHp, _hp);
-
-            var newBarrel = new Barrel(_newBarrelAudioClip, _barrelPosition, _newBarrel);
-            _modificationWeapon = new ModificationBarrel(_barrelPosition.position, newBarrel, _audioSource);
-            _modificationWeapon.ApplyModification(_gun);
         }
         
         private void Update()
@@ -76,11 +73,18 @@ namespace Arkanoid
 
             if (Input.GetButtonDown("Fire2"))
             {
-                //var altBullet = _altGun.AltShoot();
-                //Destroy(altBullet, _bulletLifeTime);
-
-                //_modificationWeapon.Shoot();
+                var altBullet = _altGun.AltShoot();
+                Destroy(altBullet, _bulletLifeTime);
             }
+
+            if (Input.GetKeyDown(KeyCode.Alpha1) && !isModified)
+            {
+                var newBarrel = new Barrel(_newBarrelAudioClip, _barrelPosition, _newBarrel);
+                _modificationWeapon = new ModificationBarrel(_barrelPosition, newBarrel, _audioSource);
+                _modificationWeapon.ApplyModification(_gun);
+                isModified = true;
+            }
+
 
 
         }

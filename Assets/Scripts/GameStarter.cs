@@ -63,11 +63,12 @@ namespace Arkanoid
             {
                 CreateEnemy();
             }
-            
+            /*
             if (Input.GetButtonDown("Fire3"))
             {
                 StartCoroutine(DestroyEnemy());
             }
+            */
         }
 
         // мне не нравится, что метод создания астероидов находится в этом классе, но уже нет времени придумывать, как его перенести, оставлю тут
