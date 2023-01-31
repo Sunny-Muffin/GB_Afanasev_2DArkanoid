@@ -1,4 +1,5 @@
 using ObjectPool;
+using System;
 using UnityEngine;
 
 
@@ -11,20 +12,31 @@ namespace Arkanoid
         [SerializeField] private float _maxHp = 100;
         [SerializeField] private float _hp = 100;
 
+        [Header("Standart Gun")]
         [SerializeField] private Rigidbody2D _bullet;
-        [SerializeField] private Transform _barrel;
+        [SerializeField] private Transform _barrelPosition;
         [SerializeField] private float _force;
+        [SerializeField] private AudioSource _audioSource;
+        [SerializeField] private AudioClip _audioClip;
 
+        [Header("New barrel")]
+        [SerializeField] private AudioClip _newBarrelAudioClip;
+        [SerializeField] private GameObject _newBarrel;
+
+        [Header("Alternative Gun")]
         [SerializeField] private Sprite _bulletSprite;
         [SerializeField] private float _bulletMass;
-        [SerializeField] private int bulletLayer = 3;
-        [SerializeField] private float bulletLifeTime = 2f;
+        [SerializeField] private int _bulletLayer = 3;
+        [SerializeField] private float _bulletLifeTime = 2f;
 
         private Camera _camera;
         private Ship _ship;
         private Gun _gun;
+        private Gun _altGun;
         private Health _health;
         private IViewServices _viewServices;
+        private ModificationWeapon _modificationWeapon;
+        private bool isModified = false;
 
         private void Start()
         {
@@ -33,7 +45,8 @@ namespace Arkanoid
             var rotation = new RotateTransform(transform);
             _ship = new Ship(moveTransform, rotation);
             _viewServices = new ViewServices();
-            _gun = new Gun(_bullet, _viewServices, _force, _barrel);
+            _gun = new Gun(_bullet, _viewServices, _force, _barrelPosition, _audioSource, _audioClip);
+            _altGun = new Gun(_bulletLayer, _barrelPosition, _bulletMass, _bulletSprite, _force);
             _health = new Health(_maxHp, _hp);
         }
         
@@ -60,19 +73,20 @@ namespace Arkanoid
 
             if (Input.GetButtonDown("Fire2"))
             {
-                // да, для всего этого можно было создать новый метод в классе Gun
-                // я сначала так и сделал, но не придумал, как вызывать Destroy
-                // так что пусть будет тут
-                var altBullet = new GameObject().
-                    SetName("AltBullet").
-                    SetLayer(bulletLayer).
-                    SetTransform(_barrel).
-                    AddBoxCollider2D().
-                    AddRigidbody2D(_bulletMass).
-                    AddSprite(_bulletSprite).
-                    AddForce(_force, _barrel);
-                Destroy(altBullet, bulletLifeTime);
+                var altBullet = _altGun.AltShoot();
+                Destroy(altBullet, _bulletLifeTime);
             }
+
+            if (Input.GetKeyDown(KeyCode.Alpha1) && !isModified)
+            {
+                var newBarrel = new Barrel(_newBarrelAudioClip, _barrelPosition, _newBarrel);
+                _modificationWeapon = new ModificationBarrel(_barrelPosition, newBarrel, _audioSource);
+                _modificationWeapon.ApplyModification(_gun);
+                isModified = true;
+            }
+
+
+
         }
 
         private void OnCollisionEnter2D(Collision2D other)

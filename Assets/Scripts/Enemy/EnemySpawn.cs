@@ -8,6 +8,12 @@ namespace Arkanoid
         public static IEnemyFactory Factory;
         public Health Health { get; protected set; }
 
+        public static Enemy CreateEnemy()
+        {
+            var enemy = Instantiate(Resources.Load<Enemy>("Enemy/Enemy"));
+            return enemy;
+        }
+
         public static Asteroid CreateAsteroidEnemy(Health hp)
         {
             var enemy = Instantiate(Resources.Load<Asteroid>("Enemy/Asteroid"));
