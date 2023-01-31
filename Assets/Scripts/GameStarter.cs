@@ -25,15 +25,19 @@ namespace Arkanoid
         [SerializeField] private float hitRadius = 0.7f;
 
         private Camera _camera;
-        private Transform _player;
+        private Transform _playerTransform;
         private List<Asteroid> _asteroids = new List<Asteroid>();
         private IViewServices _viewServices;
         private Enemy _enemy;
         private bool _enemyExists = false;
+
+        private Player _player;
+
         private void Start()
         {
             _camera = Camera.main;
-            _player = FindObjectOfType<Player>().transform;
+            _player = FindObjectOfType<Player>();
+            _playerTransform = _player.transform;
             float width = _camera.pixelWidth;
             float height = _camera.pixelHeight;
             Vector2 topRight = _camera.ScreenToWorldPoint(new Vector2(width, height));
@@ -69,6 +73,18 @@ namespace Arkanoid
                 StartCoroutine(DestroyEnemy());
             }
             */
+
+
+            if (Input.GetKeyDown(KeyCode.Alpha3))
+            {
+                Debug.Log("Applying modifications");
+                var root = new PlayerModifier(_player);
+                root.Add(new PlayerSpeedModifier(_player, 10));
+                root.Add(new PlayerGunModifier(_player, "GeekBrains is shit"));
+                root.Add(new PlayerHealthModifier(_player, 20));
+                root.Handle();
+                Debug.Log("Finished modifications");
+            }
         }
 
         // мне не нравится, что метод создания астероидов находится в этом классе, но уже нет времени придумывать, как его перенести, оставлю тут
@@ -76,7 +92,7 @@ namespace Arkanoid
         {
             float force = Random.Range(_minAsteroidForce, _maxAsteroidForce);
             Vector3 position = new Vector2(SpawnPoint(_spawnRadius).x, SpawnPoint(_spawnRadius).y);
-            Vector3 direction = _player.position - position;
+            Vector3 direction = _playerTransform.position - position;
             var enemy = EnemySpawn.CreateAsteroidWithPosition(new Health(_maxHp, _hp), force, position, direction);
             _asteroids.Add(enemy);
         }
@@ -85,7 +101,7 @@ namespace Arkanoid
         {
             for (int i = 0; i < _asteroids.Count; ++i)
             {
-                var distance = (_asteroids[i].transform.position - _player.position).magnitude;
+                var distance = (_asteroids[i].transform.position - _playerTransform.position).magnitude;
                 var ast = _asteroids[i];
                 if (distance > _spawnRadius)
                 {
