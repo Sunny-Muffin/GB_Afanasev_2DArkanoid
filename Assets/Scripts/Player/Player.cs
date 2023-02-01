@@ -1,5 +1,4 @@
 using ObjectPool;
-using System;
 using UnityEngine;
 
 
@@ -7,9 +6,9 @@ namespace Arkanoid
 {
     internal sealed class Player : MonoBehaviour
     {
-        [SerializeField] private float _speed;
+        public float _speed;
         [SerializeField] private float _acceleration;
-        [SerializeField] private float _maxHp = 100;
+        public float _maxHp = 100;
         [SerializeField] private float _hp = 100;
 
         [Header("Standart Gun")]
@@ -37,6 +36,8 @@ namespace Arkanoid
         private IViewServices _viewServices;
         private ModificationWeapon _modificationWeapon;
         private bool isModified = false;
+
+        public string _gunName = "GeekBrains sucks";
 
         private void Start()
         {
@@ -85,7 +86,12 @@ namespace Arkanoid
                 isModified = true;
             }
 
-
+            if (Input.GetKeyDown(KeyCode.Alpha2))
+            {
+                Debug.Log($"Current GUN is {_gunName}");
+                Debug.Log($"Current SPEED is {_speed}");
+                Debug.Log($"Current MAXHP is {_maxHp}");
+            }
 
         }
 
